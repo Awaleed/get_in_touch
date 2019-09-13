@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get_in_touch/pages/about_me.dart';
+import 'package:get_in_touch/pages/caonnect..dart';
+import 'package:get_in_touch/pages/skills.dart';
+import 'package:get_in_touch/pages/works.dart';
 
 void main() => runApp(MyApp());
 
@@ -9,6 +13,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: Color(0xFF1D1826),
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
@@ -25,39 +30,84 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  PageController controller = PageController();
+  int currentPage = 0;
+  int numberOfPages = 3;
 
-  void _incrementCounter() {
+  int _nextPage() {
     setState(() {
-      _counter++;
+      if (currentPage == numberOfPages)
+        currentPage = numberOfPages;
+      else
+        ++currentPage;
     });
+    return currentPage;
+  }
+
+  int _previousPage() {
+    setState(() {
+      if (currentPage == 0)
+        currentPage = 0;
+      else
+        --currentPage;
+    });
+    return currentPage;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
-            ),
-          ],
+    return Stack(
+      children: [
+        Scaffold(
+          body: PageView(
+            onPageChanged: (int p) => setState(() => currentPage = p),
+            controller: controller,
+            scrollDirection: Axis.vertical,
+            children: <Widget>[
+              AboutMe(),
+              Skills(),
+              Works(),
+              Connect(),
+            ],
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ),
+        SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              AnimatedOpacity(
+                child: FloatingActionButton(
+                  child: Icon(Icons.arrow_drop_up),
+                  onPressed: () {
+                    controller.animateToPage(
+                      _previousPage(),
+                      curve: Curves.linearToEaseOut,
+                      duration: Duration(milliseconds: 500),
+                    );
+                  },
+                ),
+                duration: Duration(milliseconds: 300),
+                opacity: (currentPage == 0) ? 0 : 1,
+              ),
+              AnimatedOpacity(
+                child: FloatingActionButton(
+                  child: Icon(Icons.arrow_drop_down),
+                  onPressed: () {
+                    controller.animateToPage(
+                      _nextPage(),
+                      curve: Curves.linearToEaseOut,
+                      duration: Duration(milliseconds: 500),
+                    );
+                  },
+                ),
+                duration: Duration(milliseconds: 300),
+                opacity: (currentPage == numberOfPages) ? 0 : 1,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
